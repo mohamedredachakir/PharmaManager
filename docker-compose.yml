@@ -1,0 +1,75 @@
+services:
+  postgres:
+    image: postgres:15-alpine
+    container_name: pharmamanager_db
+    environment:
+      POSTGRES_DB: pharma_db
+      POSTGRES_USER: postgres
+      POSTGRES_PASSWORD: postgres
+    ports:
+      - "5432:5432"
+    volumes:
+      - postgres_data:/var/lib/postgresql/data
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U postgres"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+    networks:
+      - pharmamanager_network
+
+  backend:
+    build:
+      context: ./backend
+      dockerfile: Dockerfile
+    container_name: pharmamanager_backend
+    command: >
+      sh -c "python manage.py migrate &&
+             python manage.py loaddata fixtures/initial_data.json &&
+             python manage.py runserver 0.0.0.0:8000"
+    environment:
+      DEBUG: "True"
+      SECRET_KEY: "django-insecure-test-key-change-in-production"
+      DB_ENGINE: "django.db.backends.postgresql"
+      DB_NAME: "pharma_db"
+      DB_USER: "postgres"
+      DB_PASSWORD: "postgres"
+      DB_HOST: "postgres"
+      DB_PORT: "5432"
+      ALLOWED_HOSTS: "localhost,127.0.0.1,backend,*"
+    ports:
+      - "8000:8000"
+    volumes:
+      - ./backend:/app
+    depends_on:
+      postgres:
+        condition: service_healthy
+    networks:
+      - pharmamanager_network
+
+  frontend:
+    build:
+      context: ./frontend
+      dockerfile: Dockerfile
+    container_name: pharmamanager_frontend
+    environment:
+      VITE_API_BASE_URL: "http://localhost:8000/api/v1"
+    user: "${UID:-1000}:${GID:-1000}"
+    command: >
+      sh -c "npm run dev -- --host 0.0.0.0 --port 5173"
+    ports:
+      - "5173:5173"
+    volumes:
+      - ./frontend:/app
+      - /app/node_modules
+    networks:
+      - pharmamanager_network
+    depends_on:
+      - backend
+
+volumes:
+  postgres_data:
+
+networks:
+  pharmamanager_network:
+    driver: bridge
