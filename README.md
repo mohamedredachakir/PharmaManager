@@ -264,6 +264,4 @@ Pour des questions ou des problèmes:
 Test technique SMARTHOLOL - Tous droits réservés
 
 ---
-
-**Développé avec ❤️ — PharmaManager v1.0.0**
 # PharmaManager
