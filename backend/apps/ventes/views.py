@@ -14,10 +14,17 @@ from .serializers import VenteCreateSerializer, VenteReadSerializer
 @extend_schema(tags=['Ventes'])
 class VenteViewSet(ModelViewSet):
     """
-    ViewSet for managing pharmacy sales transactions.
-    - list/retrieve use VenteReadSerializer for full details
-    - create uses VenteCreateSerializer with nested lignes
-    - Custom annuler action for sale cancellation with stock restoration
+    ViewSet for sales transactions and stock impact workflows.
+
+    Endpoints:
+        GET /ventes/: List sales with nested lines.
+        POST /ventes/: Create sale, deduct stock, snapshot prices.
+        GET /ventes/{id}/: Retrieve one sale with lines.
+        POST /ventes/{id}/annuler/: Cancel sale and restore stock.
+
+    Notes:
+        Update and delete methods are intentionally disabled.
+        Creation is transactional to avoid partial stock updates.
     """
     queryset = Vente.objects.all()
     http_method_names = ['get', 'post', 'head', 'options']

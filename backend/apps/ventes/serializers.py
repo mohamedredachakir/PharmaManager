@@ -10,8 +10,14 @@ from apps.medicaments.models import Medicament
 
 class LigneVenteCreateSerializer(serializers.ModelSerializer):
     """
-    Serializer for creating ligne vente.
-    Validates that medicament has sufficient stock.
+    Write serializer for creating a sale line item.
+
+    Attributes:
+        medicament_id (int): Target medicament id.
+        quantite (int): Quantity requested.
+
+    Returns:
+        dict: Validated payload enriched with the resolved medicament instance.
     """
     medicament_id = serializers.IntegerField(write_only=True)
 
@@ -37,8 +43,17 @@ class LigneVenteCreateSerializer(serializers.ModelSerializer):
 
 class LigneVenteReadSerializer(serializers.ModelSerializer):
     """
-    Serializer for reading ligne vente.
-    Includes nested medicament information.
+    Read serializer for sale line details.
+
+    Attributes:
+        id (int): Line identifier.
+        medicament (dict): Nested medicament id and name.
+        quantite (int): Sold quantity.
+        prix_unitaire (Decimal): Snapshot unit price.
+        sous_total (Decimal): Computed line total.
+
+    Returns:
+        dict: Serialized sale-line payload.
     """
     medicament = serializers.SerializerMethodField()
 
@@ -54,8 +69,14 @@ class LigneVenteReadSerializer(serializers.ModelSerializer):
 
 class VenteCreateSerializer(serializers.Serializer):
     """
-    Serializer for creating a sale.
-    Accepts nested lignes. Captures price snapshot, deducts stock, computes total.
+    Write serializer for creating a complete sale transaction.
+
+    Attributes:
+        lignes (list): Collection of sale line payloads.
+        notes (str): Optional free-text note.
+
+    Returns:
+        Vente: Persisted sale with computed totals and deducted stock.
     """
     lignes = LigneVenteCreateSerializer(many=True)
     notes = serializers.CharField(required=False, allow_blank=True)
@@ -101,8 +122,19 @@ class VenteCreateSerializer(serializers.Serializer):
 
 class VenteReadSerializer(serializers.ModelSerializer):
     """
-    Serializer for reading vente details.
-    Includes nested lignes with full details.
+    Read serializer for sale headers and nested line details.
+
+    Attributes:
+        id (int): Sale id.
+        reference (str): Business sale code.
+        date_vente (datetime): Sale creation timestamp.
+        total_ttc (Decimal): Total amount.
+        statut (str): Sale state.
+        notes (str): Optional sale note.
+        lignes (list): Nested list of serialized line items.
+
+    Returns:
+        dict: Serialized sale response payload.
     """
     lignes = LigneVenteReadSerializer(many=True, read_only=True)
 

@@ -9,8 +9,21 @@ from .models import Medicament
 
 class MedicamentListSerializer(serializers.ModelSerializer):
     """
-    Serializer for listing medicaments.
-    Includes computed est_en_alerte field (read-only).
+    Read serializer used for medicament list and detail responses.
+
+    Attributes:
+        id (int): Medicament identifier.
+        nom (str): Commercial name.
+        dci (str): Generic denomination.
+        categorie (int): Category id.
+        prix_achat (Decimal): Purchase price.
+        prix_vente (Decimal): Sale price.
+        stock_actuel (int): Current stock quantity.
+        stock_minimum (int): Low-stock threshold.
+        est_en_alerte (bool): Computed low-stock indicator.
+
+    Returns:
+        dict: Serialized medicament payload for API reads.
     """
     est_en_alerte = serializers.SerializerMethodField()
 
@@ -30,8 +43,23 @@ class MedicamentListSerializer(serializers.ModelSerializer):
 
 class MedicamentCreateSerializer(serializers.ModelSerializer):
     """
-    Serializer for creating medicaments.
-    Includes validations for prices, stock minimum, and expiration date.
+    Write serializer for medicament creation.
+
+    Attributes:
+        nom (str): Commercial name.
+        dci (str): Generic denomination.
+        categorie (int): Linked category id.
+        forme (str): Pharmaceutical form.
+        dosage (str): Product dosage.
+        prix_achat (Decimal): Purchase price.
+        prix_vente (Decimal): Sale price.
+        stock_actuel (int): Initial stock quantity.
+        stock_minimum (int): Alert threshold.
+        date_expiration (date): Expiry date.
+        ordonnance_requise (bool): Prescription flag.
+
+    Returns:
+        Medicament: Created medicament instance.
     """
 
     class Meta:
@@ -65,8 +93,23 @@ class MedicamentCreateSerializer(serializers.ModelSerializer):
 
 class MedicamentUpdateSerializer(serializers.ModelSerializer):
     """
-    Serializer for updating medicaments.
-    Same validations as create.
+    Write serializer for medicament update and partial update.
+
+    Attributes:
+        nom (str): Commercial name.
+        dci (str): Generic denomination.
+        categorie (int): Linked category id.
+        forme (str): Pharmaceutical form.
+        dosage (str): Product dosage.
+        prix_achat (Decimal): Purchase price.
+        prix_vente (Decimal): Sale price.
+        stock_actuel (int): Current stock quantity.
+        stock_minimum (int): Alert threshold.
+        date_expiration (date): Expiry date.
+        ordonnance_requise (bool): Prescription flag.
+
+    Returns:
+        Medicament: Updated medicament instance.
     """
 
     class Meta:

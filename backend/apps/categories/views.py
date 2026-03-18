@@ -11,8 +11,19 @@ from .serializers import CategorieSerializer
 @extend_schema(tags=['Catégories'])
 class CategorieViewSet(ModelViewSet):
     """
-    ViewSet for managing pharmacy drug categories.
-    Provides full CRUD operations on categories.
+    ViewSet for full category management.
+
+    Endpoints:
+        GET /categories/: List all categories.
+        POST /categories/: Create a new category.
+        GET /categories/{id}/: Retrieve one category.
+        PUT /categories/{id}/: Replace one category.
+        PATCH /categories/{id}/: Partially update one category.
+        DELETE /categories/{id}/: Delete one category.
+
+    Notes:
+        Categories are used by medicaments through a protected foreign key.
+        Deletion may fail if the category is still referenced.
     """
     queryset = Categorie.objects.all()
     serializer_class = CategorieSerializer
@@ -86,6 +97,21 @@ class CategorieViewSet(ModelViewSet):
     )
     def update(self, request, *args, **kwargs):
         return super().update(request, *args, **kwargs)
+
+    @extend_schema(
+        summary='Modifier partiellement une catégorie',
+        description='Met à jour partiellement les champs d\'une catégorie existante.',
+        responses={200: CategorieSerializer},
+        examples=[
+            OpenApiExample(
+                'Payload patch catégorie',
+                value={'description': 'Description mise à jour'},
+                request_only=True,
+            )
+        ],
+    )
+    def partial_update(self, request, *args, **kwargs):
+        return super().partial_update(request, *args, **kwargs)
 
     @extend_schema(
         summary='Supprimer une catégorie',

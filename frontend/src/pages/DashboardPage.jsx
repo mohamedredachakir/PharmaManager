@@ -2,13 +2,17 @@ import { useAlertes } from '../hooks/useAlertes';
 import { useMedicaments } from '../hooks/useMedicaments';
 import { useVentes } from '../hooks/useVentes';
 import LoadingSpinner from '../components/common/LoadingSpinner';
+import ErrorMessage from '../components/common/ErrorMessage';
 import AlertBadge from '../components/common/AlertBadge';
 import { formatCurrency, formatDate } from '../utils/formatters';
 
 export default function DashboardPage() {
-  const { medicaments } = useMedicaments();
-  const { alertes, loading: alertLoading } = useAlertes();
-  const { ventes } = useVentes();
+  const { medicaments, loading: medicamentsLoading, error: medicamentsError } = useMedicaments();
+  const { alertes, loading: alertLoading, error: alertesError } = useAlertes();
+  const { ventes, loading: ventesLoading, error: ventesError } = useVentes();
+
+  const isLoading = medicamentsLoading || alertLoading || ventesLoading;
+  const pageError = medicamentsError || alertesError || ventesError;
 
   const today = new Date().toISOString().slice(0, 10);
   const ventesAujourdhui = ventes.filter((v) => v.date_vente?.slice(0, 10) === today && v.statut !== 'ANNULEE');
@@ -20,6 +24,9 @@ export default function DashboardPage() {
         <h1>Dashboard</h1>
         <span style={{ fontSize: '12px', color: 'var(--color-text-muted)' }}>{formatDate(new Date().toISOString())}</span>
       </div>
+
+      {isLoading && <LoadingSpinner />}
+      <ErrorMessage message={pageError} />
 
       <div className="stats-grid">
         <div className="stat-card stat-green">

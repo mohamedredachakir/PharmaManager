@@ -8,8 +8,16 @@ from .models import Categorie
 
 class CategorieSerializer(serializers.ModelSerializer):
     """
-    Serializer for Categorie model.
-    Validates that nom is not empty or blank.
+    Serializer for category CRUD operations.
+
+    Attributes:
+        id (int): Unique category identifier.
+        nom (str): Category label.
+        description (str): Optional business description.
+        date_creation (datetime): Automatic creation timestamp.
+
+    Returns:
+        dict: Serialized category payload for API responses.
     """
 
     class Meta:

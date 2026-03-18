@@ -15,10 +15,20 @@ from .serializers import MedicamentListSerializer, MedicamentCreateSerializer, M
 @extend_schema(tags=['Médicaments'])
 class MedicamentViewSet(ModelViewSet):
     """
-    ViewSet for managing pharmacy medicaments.
-    - Filters to show only active medicaments
-    - Soft delete: DELETE sets est_actif=False
-    - Custom alertes endpoint for low stock items
+    ViewSet for complete medicament management.
+
+    Endpoints:
+        GET /medicaments/: List active medicaments.
+        POST /medicaments/: Create a medicament.
+        GET /medicaments/{id}/: Retrieve one medicament.
+        PUT /medicaments/{id}/: Replace one medicament.
+        PATCH /medicaments/{id}/: Partially update one medicament.
+        DELETE /medicaments/{id}/: Archive medicament (soft delete).
+        GET /medicaments/alertes/: List low-stock medicaments.
+
+    Notes:
+        The default queryset excludes archived rows (`est_actif=False`).
+        DELETE does not remove data physically and keeps historical traceability.
     """
     filterset_fields = ['categorie', 'ordonnance_requise']
     search_fields = ['nom', 'dci']
@@ -142,6 +152,22 @@ class MedicamentViewSet(ModelViewSet):
     )
     def update(self, request, *args, **kwargs):
         return super().update(request, *args, **kwargs)
+
+    @extend_schema(
+        summary='Modifier partiellement un médicament',
+        description='Met à jour un sous-ensemble des champs d\'un médicament.',
+        request=MedicamentUpdateSerializer,
+        responses={200: MedicamentListSerializer},
+        examples=[
+            OpenApiExample(
+                'Payload patch médicament',
+                value={'stock_actuel': 42},
+                request_only=True,
+            )
+        ],
+    )
+    def partial_update(self, request, *args, **kwargs):
+        return super().partial_update(request, *args, **kwargs)
 
     @extend_schema(
         summary='Soft delete un médicament',
